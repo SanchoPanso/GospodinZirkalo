@@ -5,8 +5,11 @@ from pathlib import Path
 import os
 
 
-def find_red_box(img: np.ndarray):
+def find_id_18(img: np.ndarray, bb=None):
     bd = cv2.barcode.BarcodeDetector()
+
+    if bb is not None:
+        img[bb[1]:bb[3], bb[0]:bb[2]] = (128, 128, 128)
 
     h = img.shape[0]
     w = img.shape[1]
@@ -25,15 +28,13 @@ def find_red_box(img: np.ndarray):
 
             roi = img[y_1: y_2, x_1: x_2]
 
-            if i == 2 and j == 1:
-                pass
-
             retval, decoded_info, decoded_type, points = bd.detectAndDecode(roi)
             if decoded_info and decoded_info[0] != '15061027':
                 points = points[0]
                 points[:, 0] += x_1
                 points[:, 1] += y_1
                 points_list.append(points)
+
     area_list = []
     for pts in points_list:
         area = cv2.contourArea(pts)
@@ -53,16 +54,31 @@ def find_red_box(img: np.ndarray):
     x2 += int((x2 - x1) * 9)
     x1 -= 150
 
+    # roi = img[y1: y2, x1: x2]
+    # if np.mean(roi) > 180:
+    #     return None
+
+    h = y2 - y1
+    w = x2 - x1
+
+    if w > 10 * h:
+        return None
+
     return (x1, y1, x2, y2)
 
 
-if __name__ == '__main__':
-    ROOT = Path(os.getcwd())
-    imgs_path = r'D:\datasets\data'
-    for img_name in os.listdir(imgs_path):
-        # if img_name != '(7).jpg':
-        #     continue
-        image = cv2.imread(os.path.join(imgs_path, img_name))
-        img_out = find_red_box(image)
-        if img_out is not None:
-            cv2.imwrite(os.path.join('results', '18', img_name), img_out)
+# if __name__ == '__main__':
+#     img_path = r'D:\datasets\data\(10).jpg'
+#
+#     image = cv2.imread(img_path)
+#     img_out = find_red_box(image)
+#     if img_out is not None:
+#         cv2.imwrite('124.png', img_out)
+
+    # imgs_path = r'D:\datasets\data'
+    # for img_name in os.listdir(imgs_path):
+    #     image = cv2.imread(os.path.join(imgs_path, img_name))
+    #     img_out = find_red_box(image)
+    #
+    #     if img_out is not None:
+    #         cv2.imwrite(os.path.join('results', '17', img_name), img_out)
