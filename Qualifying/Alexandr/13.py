@@ -30,8 +30,8 @@ def find_id_13(img: np.ndarray) -> Tuple[int] or None:
         iterations=3
     )
     
-    # cv2.imshow("mask", cv2.resize(mask, (600, 600)))
-    # cv2.waitKey()
+    cv2.imshow("mask", cv2.resize(mask, (600, 600)))
+    cv2.waitKey()
     
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     necessary_objects = []
@@ -67,7 +67,16 @@ def find_id_13(img: np.ndarray) -> Tuple[int] or None:
     if len(necessary_objects) == 0:
         return None
     
-    return necessary_objects[0]
+    # fix width, height
+    x1, y1, x2, y2 = necessary_objects[0]
+    w = x2 - x1
+    h = y2 - y1
+    x1 -= int(w * 0.3)
+    x2 += int(w * 0.3)
+    y1 -= int(h * 0.05)
+    y2 += int(h * 0.05)
+    
+    return x1, y1, x2, y2
 
 
 def run_searcing_func(src_path, dst_path):
@@ -78,8 +87,8 @@ def run_searcing_func(src_path, dst_path):
         print(x1, y1, x2, y2)
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 10)
         
-    # cv2.imshow(filename, cv2.resize(img, (600, 600)))
-    # cv2.waitKey()
+    cv2.imshow(filename, cv2.resize(img, (600, 600)))
+    cv2.waitKey()
     cv2.imwrite(dst_path, img)
 
 

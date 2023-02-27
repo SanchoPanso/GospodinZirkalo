@@ -71,6 +71,7 @@ def find_id_11(img: np.ndarray) -> Tuple[int] or None:
             continue
         
         if metric < 2.3:
+            print(cnt_area)
             yellow_triangles.append(cnt)
             # cv2.drawContours(img, cnts, i, (0, 255, 0), 5)
     
@@ -90,6 +91,15 @@ def find_id_11(img: np.ndarray) -> Tuple[int] or None:
             y1 = min(y1, y)
             x2 = max(x2, x + w)
             y2 = max(y2, y + h)
+    
+    # fix width, height
+    w = x2 - x1
+    h = y2 - y1
+    x1 -= int(w * 0.25)
+    x2 += int(w * 0.25)
+    y1 -= int(h * 0.1)
+    y2 += int(h * 0.1)
+    
     
     return x1, y1, x2, y2
     

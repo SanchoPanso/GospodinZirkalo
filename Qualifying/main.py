@@ -5,21 +5,27 @@ from typing import Tuple
 
 
 def main():
+    
+    # Conformity between obj id and finding functions
     functions = {
         '11': find_id_11,
         # '13': find_id_13,
     }
     
+    # Read the image
     image_path = input()
     img = cv2.imread(image_path)
     
     for id in functions:
+        img_copy = img.copy()   # Function can damage orig img, so we need copy
         func = functions[id]
-        res = func(img)
+        res = func(img_copy)
         
+        # If res is None, then obj is not here (skip)
         if res is None:
             continue
         
+        # Otherwise print its coordinates
         x1, y1, x2, y2 = res
         print(f"{id}:{x1};{y1};{x2};{y2}")
 
