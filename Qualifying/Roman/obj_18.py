@@ -4,12 +4,18 @@ import numpy as np
 from pathlib import Path
 import os
 
+from obj_19 import find_id_19
 
-def find_id_18(img: np.ndarray, bb=None):
+
+def find_id_18(img: np.ndarray):
     bd = cv2.barcode.BarcodeDetector()
 
-    if bb is not None:
-        img[bb[1]:bb[3], bb[0]:bb[2]] = (128, 128, 128)
+    # img_tmp = img.copy()
+
+    coords_19 = find_id_19(img)
+
+    if coords_19 is not None:
+        img[coords_19[1]:coords_19[3], coords_19[0]:coords_19[2]] = (128, 128, 128)
 
     h = img.shape[0]
     w = img.shape[1]
@@ -66,7 +72,6 @@ def find_id_18(img: np.ndarray, bb=None):
 
     return (x1, y1, x2, y2)
 
-
 # if __name__ == '__main__':
 #     img_path = r'D:\datasets\data\(10).jpg'
 #
@@ -75,10 +80,10 @@ def find_id_18(img: np.ndarray, bb=None):
 #     if img_out is not None:
 #         cv2.imwrite('124.png', img_out)
 
-    # imgs_path = r'D:\datasets\data'
-    # for img_name in os.listdir(imgs_path):
-    #     image = cv2.imread(os.path.join(imgs_path, img_name))
-    #     img_out = find_red_box(image)
-    #
-    #     if img_out is not None:
-    #         cv2.imwrite(os.path.join('results', '17', img_name), img_out)
+# imgs_path = r'D:\datasets\data'
+# for img_name in os.listdir(imgs_path):
+#     image = cv2.imread(os.path.join(imgs_path, img_name))
+#     img_out = find_red_box(image)
+#
+#     if img_out is not None:
+#         cv2.imwrite(os.path.join('results', '17', img_name), img_out)
