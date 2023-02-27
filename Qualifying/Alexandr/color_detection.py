@@ -121,7 +121,7 @@ def detection_tools_hsv(filename: str):
 
 
 if __name__ == '__main__':
-    image_path = os.path.join(str(Path(__file__).parent), 'images_argus',  '(11).jpg')
+    image_path = os.path.join(str(Path(__file__).parent),  'exp.jpg')
     detection_tools_hsv(image_path)
     
 
