@@ -22,7 +22,7 @@ def find_id_4(img: np.ndarray) -> Tuple[int] or None:
 
     mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE,
                            kernel, iterations=4)
-
+    #find contours
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     necessary_object = []
     max_area = 0
@@ -36,14 +36,6 @@ def find_id_4(img: np.ndarray) -> Tuple[int] or None:
             continue
 
         necessary_object.append((4, int(x-0.25*w), int(y-0.25*h), int(x + w*1.25), int(y + h*1.25)))
-
-        # # Debug
-        cv2.drawContours(img, contours, i, (0, 255, 0), 5)
-        cv2.rectangle(img, (int(x-0.25*w), int(y-0.2*h)), (int(x + w*1.25), int(y + h*1.2)), (0, 255, 255), 5)
-        print(x, y, w, h, perimeter, square)
-
-    cv2.imshow("cnts", cv2.resize(img, (600, 600)))
-    cv2.waitKey()
 
     if len(necessary_object) == 0:
         return None
