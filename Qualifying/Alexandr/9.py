@@ -36,10 +36,10 @@ def logarithmic_transform(img: np.ndarray, c: float):
 
 def find_id_9(img: np.ndarray) -> Tuple[int] or None:
     
-    
     blur = cv2.GaussianBlur(img, (11, 11), 3)
     sharped = np.abs(img.astype('int32') - blur.astype('int32'))
     sharped = logarithmic_transform(sharped.astype('uint8'), 20)
+    
     # cv2.imshow("sharped", cv2.resize(sharped, (1000, 1000)))
     # cv2.waitKey()
     
@@ -125,10 +125,18 @@ def find_id_9(img: np.ndarray) -> Tuple[int] or None:
     # fix width, height
     w = obj_x2 - obj_x1
     h = obj_y2 - obj_y1
-    obj_x1 -= int(w * 0.5)
-    obj_x2 += int(w * 0.5)
-    obj_y1 -= int(h * 0.5)
-    obj_y2 += int(h * 0.5)
+    
+    if w / h >= 2:
+        obj_x1 -= int(w * 0.5)
+        obj_x2 += int(w * 0.5)
+        obj_y1 -= int(h * 2)
+        obj_y2 += int(h * 2)
+    else:
+        obj_x1 -= int(w * 0.25)
+        obj_x2 += int(w * 0.25)
+        obj_y1 -= int(h * 0.5)
+        obj_y2 += int(h * 0.5)
+    
     
     return (obj_x1, obj_y1, obj_x2, obj_y2)
     

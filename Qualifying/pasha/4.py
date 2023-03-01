@@ -40,7 +40,7 @@ def find_id_4(img: np.ndarray) -> Tuple[int] or None:
     if len(necessary_object) == 0:
         return None
     #that object may have to 2 bounding rectangles, so have to unite them
-    object = [4,necessary_object[0][1],necessary_object[0][3],necessary_object[0][2],necessary_object[0][4]]
+    object = [4, necessary_object[0][1],necessary_object[0][3],necessary_object[0][2],necessary_object[0][4]]
     for i in necessary_object:
         if i[1] < object[1]:
             object[1] = i[1]
@@ -50,7 +50,7 @@ def find_id_4(img: np.ndarray) -> Tuple[int] or None:
             object[3] = i[3]
         if i[4] > object[4]:
             object[4] = i[4]
-    return object
+    return object[1:]
 
 def _contour_is_circle(cnt) -> bool:
     perimeter = cv2.arcLength(cnt, True)

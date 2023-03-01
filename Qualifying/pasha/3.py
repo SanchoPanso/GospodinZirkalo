@@ -40,7 +40,7 @@ def find_id_3(img: np.ndarray) -> Tuple[int] or None:
         else:
             continue
 
-        necessary_object = (3, x, y, x + w, y + h)
+        necessary_object = (x, y, x + w, y + h)
 
     if len(necessary_object) == 0:
         return None
