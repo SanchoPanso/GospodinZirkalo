@@ -10,8 +10,8 @@ def main():
     functions = {
         '1': find_id_1,
         '2': find_id_2,
-        '3': lambda x: None,
-        '4': lambda x: None,
+        '3': find_id_3,
+        '4': find_id_4,
         '5': lambda x: None,
         '6': lambda x: None,
         '7': find_id_7,
@@ -35,7 +35,7 @@ def main():
     img = cv2.imread(image_path)
     
     for id in functions:
-        img_copy = img.copy()   # Function can damage orig img, so we need copy
+        img_copy = img.copy()   # Function can damage orig img, so we need a copy
         func = functions[id]
         res = func(img_copy)
         
@@ -44,7 +44,7 @@ def main():
             continue
         
         # Otherwise print its coordinates
-        x1, y1, x2, y2 = res
+        x1, y1, x2, y2 = map(int, res)
         print(f"{id}:{x1};{y1};{x2};{y2}")
         
 
@@ -88,16 +88,6 @@ def find_id_1(img: np.ndarray) -> Tuple[int] or None:
             continue
 
         necessary_object = (x, y, x + w, y + h)
-
-        # # Debug
-        cv2.drawContours(img, contours, i, (0, 255, 0), 5)
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 5)
-        print(x, y, w, h, perimeter, square)
-
-    # cv2.imshow("cnts", cv2.resize(img, (600, 600)))
-    # cv2.waitKey()
-
-
 
     if len(necessary_object) == 0:
         return None
@@ -150,13 +140,13 @@ def find_id_2(img: np.ndarray) -> Tuple[int] or None:
 
         necessary_object = (x, y, x + w, y + h)
 
-        # # Debug
-        cv2.drawContours(img, contours, i, (0, 255, 0), 5)
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 5)
-        # print(x, y, w, h, perimeter, square)
+    #     # # Debug
+    #     cv2.drawContours(img, contours, i, (0, 255, 0), 5)
+    #     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 255), 5)
+    #     # print(x, y, w, h, perimeter, square)
 
-    # cv2.imshow("cnts", cv2.resize(img, (600, 600)))
-    # cv2.waitKey()
+    # # cv2.imshow("cnts", cv2.resize(img, (600, 600)))
+    # # cv2.waitKey()
 
     if len(necessary_object) == 0:
         return None
@@ -185,8 +175,122 @@ def _contour_is_circle(cnt) -> bool:
 ############ TASK 3 #############
 #################################
 
+#find tennis ball
+def find_id_3(img: np.ndarray) -> Tuple[int] or None:
+
+    #range of color for yellow-green
+    blue_min = np.array([30, 85, 165])
+    blue_max = np.array([50, 255, 255])
+    #blur
+    img_blurred = cv2.medianBlur(img, 51)
+    #to hsv
+    imgHSV = cv2.cvtColor(img_blurred, cv2.COLOR_BGR2HSV)
+    #filter by color
+    mask = cv2.inRange(imgHSV, blue_min, blue_max)
+    #morphology
+    kernel = np.ones((10, 10), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN,
+                           kernel, iterations=2)
+    #find contours
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    necessary_object = []
+    max_area = 0
+    for i, cnt in enumerate(contours):
+        perimeter = cv2.arcLength(cnt, True)
+        square = cv2.contourArea(cnt)
+        x, y, w, h = cv2.boundingRect(cnt)
+
+        # Skip too small contours
+        if square < 4000:
+            continue
+
+        if not _contour_is_circle(cnt):
+            continue
+        #find biggest one
+        if square > max_area:
+            max_area = square
+        else:
+            continue
+
+        necessary_object = (x, y, x + w, y + h)
+
+    if len(necessary_object) == 0:
+        return None
+
+    return necessary_object
+
+
 ############ TASK 4 #############
 #################################
+
+#find green tube
+def find_id_4(img: np.ndarray) -> Tuple[int] or None:
+
+    #range of color for green
+    blue_min = np.array([40, 50, 110])
+    blue_max = np.array([70, 225, 255])
+    #blur
+    img_blurred = cv2.medianBlur(img, 51)
+    #to hsv
+    imgHSV = cv2.cvtColor(img_blurred, cv2.COLOR_BGR2HSV)
+    #filter by color
+    mask = cv2.inRange(imgHSV, blue_min, blue_max)
+    #morphology
+    kernel = np.ones((10, 10), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE,
+                           kernel, iterations=2)
+
+    mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE,
+                           kernel, iterations=4)
+    #find contours
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    necessary_object = []
+    max_area = 0
+    for i, cnt in enumerate(contours):
+        perimeter = cv2.arcLength(cnt, True)
+        square = cv2.contourArea(cnt)
+        x, y, w, h = cv2.boundingRect(cnt)
+
+        # Skip too small contours
+        if square < 4000:
+            continue
+
+        necessary_object.append((4, int(x-0.25*w), int(y-0.25*h), int(x + w*1.25), int(y + h*1.25)))
+
+    if len(necessary_object) == 0:
+        return None
+    #that object may have to 2 bounding rectangles, so have to unite them
+    object = [4, necessary_object[0][1],necessary_object[0][3],necessary_object[0][2],necessary_object[0][4]]
+    for i in necessary_object:
+        if i[1] < object[1]:
+            object[1] = i[1]
+        if i[2] < object[2]:
+            object[2] = i[2]
+        if i[3] > object[3]:
+            object[3] = i[3]
+        if i[4] > object[4]:
+            object[4] = i[4]
+    return object[1:]
+
+def _contour_is_circle(cnt) -> bool:
+    perimeter = cv2.arcLength(cnt, True)
+    square = cv2.contourArea(cnt)
+
+    (xc, yc), radius = cv2.minEnclosingCircle(cnt)
+    center = (int(xc), int(yc))
+    radius = int(radius)
+
+    circle_square = math.pi * (radius ** 2)
+    circle_perimeter = 2 * math.pi * radius
+
+    if abs(square - circle_square) / circle_square > 0.3:
+        return False
+
+    if abs(perimeter - circle_perimeter) / circle_perimeter > 0.3:
+        return False
+
+    return True
+
 
 ############ TASK 5 #############
 #################################
@@ -306,10 +410,10 @@ def logarithmic_transform(img: np.ndarray, c: float):
 
 def find_id_9(img: np.ndarray) -> Tuple[int] or None:
     
-    
     blur = cv2.GaussianBlur(img, (11, 11), 3)
     sharped = np.abs(img.astype('int32') - blur.astype('int32'))
     sharped = logarithmic_transform(sharped.astype('uint8'), 20)
+    
     # cv2.imshow("sharped", cv2.resize(sharped, (1000, 1000)))
     # cv2.waitKey()
     
@@ -395,13 +499,21 @@ def find_id_9(img: np.ndarray) -> Tuple[int] or None:
     # fix width, height
     w = obj_x2 - obj_x1
     h = obj_y2 - obj_y1
-    obj_x1 -= int(w * 0.5)
-    obj_x2 += int(w * 0.5)
-    obj_y1 -= int(h * 0.5)
-    obj_y2 += int(h * 0.5)
     
-    return (obj_x1, obj_y1, obj_x2, obj_y2)
-
+    if w / h >= 2:
+        obj_x1 -= int(w * 0.5)
+        obj_x2 += int(w * 0.5)
+        obj_y1 -= int(h * 2)
+        obj_y2 += int(h * 2)
+    else:
+        obj_x1 -= int(w * 0.25)
+        obj_x2 += int(w * 0.25)
+        obj_y1 -= int(h * 0.5)
+        obj_y2 += int(h * 0.5)
+    
+    
+    return obj_x1, obj_y1, obj_x2, obj_y2
+    
 ############ TASK 10 ############
 #################################
 
@@ -486,6 +598,15 @@ def find_id_11(img: np.ndarray) -> Tuple[int] or None:
             x2 = max(x2, x + w)
             y2 = max(y2, y + h)
     
+    # fix width, height
+    w = x2 - x1
+    h = y2 - y1
+    x1 -= int(w * 0.25)
+    x2 += int(w * 0.25)
+    y1 -= int(h * 0.1)
+    y2 += int(h * 0.1)
+    
+    
     return x1, y1, x2, y2
 
 
@@ -556,7 +677,17 @@ def find_id_13(img: np.ndarray) -> Tuple[int] or None:
     if len(necessary_objects) == 0:
         return None
     
-    return necessary_objects[0]
+    
+        # fix width, height
+    x1, y1, x2, y2 = necessary_objects[0]
+    w = x2 - x1
+    h = y2 - y1
+    x1 -= int(w * 0.25)
+    x2 += int(w * 0.25)
+    y1 -= int(h * 0.1)
+    y2 += int(h * 0.1)
+    
+    return x1, y1, x2, y2
 
 
 def _contour_is_circle(cnt) -> bool:
