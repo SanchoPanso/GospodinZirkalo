@@ -4,7 +4,9 @@ import argparse
 from ultralytics import YOLO
 from typing import Tuple
 
+
 palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
+conf_thresh = 0.4
 classes = [
     'green_tube',
     'yellow_ball',
@@ -53,7 +55,7 @@ def main():
             print('Image is not captured')
             continue
         
-        results = model(img)
+        results = model(img, conf=conf_thresh)
         
         boxes = results[0].boxes
         
@@ -62,6 +64,10 @@ def main():
             cls_id = int(box.cls.item())
             name = cls_id if cls_id >= len(classes) else classes[cls_id]
             conf = float(box.conf.item())
+            
+            # # Skip bboxes with small conf
+            # if conf < conf_thresh:
+            #     continue
             
             x1, y1, x2, y2 = map(int, xyxy[0].tolist())
             color = compute_color_for_labels(cls_id)
