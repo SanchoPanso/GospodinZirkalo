@@ -5,6 +5,23 @@ from ultralytics import YOLO
 from typing import Tuple
 
 palette = (2 ** 11 - 1, 2 ** 15 - 1, 2 ** 20 - 1)
+classes = [
+    'green_tube',
+    'yellow_ball',
+    'blue_ball',
+    'three_color_ball',
+    'wood_cube',
+    'glass_cube',
+    'uhi',
+    'greenhouse',
+    'duck',
+    'vase',
+    'bobina',
+    'elect',
+    'manupulator',
+    'tank',
+    'jump_ball',
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -25,12 +42,17 @@ def compute_color_for_labels(label: int) -> Tuple[int]:
 
 
 def main():
-    cap = cv2.VideoCapture(1)
     args = parse_args()
+    cam_id = int(args.cam)
+    cap = cv2.VideoCapture(cam_id)
     model = YOLO(args.weights)
     
     while True:
         ret, img = cap.read()
+        if ret is False:
+            print('Image is not captured')
+            continue
+        
         results = model(img)
         
         boxes = results[0].boxes
@@ -38,11 +60,12 @@ def main():
         for box in boxes:
             xyxy = box.xyxy
             cls_id = int(box.cls.item())
+            name = cls_id if cls_id >= len(classes) else classes[cls_id]
             conf = float(box.conf.item())
             
             x1, y1, x2, y2 = map(int, xyxy[0].tolist())
             color = compute_color_for_labels(cls_id)
-            text = "{0} {1:.3f}".format(cls_id, conf)
+            text = "{0} {1:.3f}".format(name, conf)
             
             t_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_PLAIN, 2, 2)[0]
             cv2.rectangle(img, (x1, y1), (x2, y2), color, 3)
