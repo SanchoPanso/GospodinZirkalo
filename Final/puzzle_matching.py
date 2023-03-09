@@ -30,7 +30,7 @@ def get_contours(input_img: np.ndarray):
 
 
 def draw_conformity(img1: np.ndarray, img2: np.ndarray, 
-                    conformity: dict, 
+                    conformity: dict, orig_ids: dict,
                     cnts1: np.ndarray, cnts2: np.ndarray):
     for i in conformity:
         j = conformity[i]
@@ -40,19 +40,28 @@ def draw_conformity(img1: np.ndarray, img2: np.ndarray,
         x1, y1, w1, h1 = cv2.boundingRect(cnt1)
         x2, y2, w2, h2 = cv2.boundingRect(cnt2)
         
-        cv2.putText(img1, str(i), (x1 + w1 // 2, y1 + h1 // 2), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-        cv2.putText(img2, str(i), (x2  + w2 // 2, y2 + h2 // 2), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+        idx = orig_ids[i]
+        cv2.putText(img1, str(idx), (x1 + w1 // 2, y1 + h1 // 2), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+        cv2.putText(img2, str(idx), (x2  + w2 // 2, y2 + h2 // 2), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
 
 
 def main():
-    img1 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-38 (3).png')
-    img2 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-39 (1).png')
+    img1 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-39 (1).png')
+    img2 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-38 (3).png')
     
     cnts1 = get_contours(img1)
     cnts2 = get_contours(img2)
     
+    orig_ids = {
+        0: 4,
+        1: 3,
+        2: 2,
+        3: 5,
+        4: 1,
+    }
+    
     conformity = match_puzzles(cnts1, cnts2)
-    draw_conformity(img1, img2, conformity, cnts1, cnts2)
+    draw_conformity(img1, img2, conformity, orig_ids, cnts1, cnts2)
     
     cv2.imshow('img1', img1)
     cv2.imshow('img2', img2)
