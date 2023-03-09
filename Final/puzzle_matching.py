@@ -11,7 +11,8 @@ def match_puzzles(cnts1: np.ndarray, cnts2: np.ndarray) -> dict:
         for j, cnt2 in enumerate(cnts2):
             metric = cv2.matchShapes(cnt1, cnt2, cv2.CONTOURS_MATCH_I2, 0)
             metrics.append(metric)
-            
+        
+        # Find suitable idx as closest contour
         metrics = np.array(metrics)
         min_idx = metrics.argmin()
         
@@ -46,12 +47,16 @@ def draw_conformity(img1: np.ndarray, img2: np.ndarray,
 
 
 def main():
+    
+    # Read images
     img1 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-39 (1).png')
     img2 = cv2.imread(r'C:\Users\HP\Downloads\Telegram Desktop\image_2023-03-08_16-11-38 (3).png')
     
+    # Find contours
     cnts1 = get_contours(img1)
     cnts2 = get_contours(img2)
     
+    # Ids of puzzles on tmplate img (img1)
     orig_ids = {
         0: 4,
         1: 3,
@@ -60,6 +65,7 @@ def main():
         4: 1,
     }
     
+    # Find conformity between contours
     conformity = match_puzzles(cnts1, cnts2)
     draw_conformity(img1, img2, conformity, orig_ids, cnts1, cnts2)
     

@@ -46,28 +46,30 @@ def compute_color_for_labels(label: int) -> Tuple[int]:
 def main():
     args = parse_args()
     cam_id = int(args.cam)
+    
     cap = cv2.VideoCapture(cam_id)
     model = YOLO(args.weights)
     
     while True:
+        # Read img
         ret, img = cap.read()
+        
+        # If img is not captured from webcam then skip it
         if ret is False:
             print('Image is not captured')
             continue
         
+        # Neural network inference
         results = model(img, conf=conf_thresh)
         
         boxes = results[0].boxes
         
+        # Draw found bboxes
         for box in boxes:
             xyxy = box.xyxy
             cls_id = int(box.cls.item())
             name = cls_id if cls_id >= len(classes) else classes[cls_id]
             conf = float(box.conf.item())
-            
-            # # Skip bboxes with small conf
-            # if conf < conf_thresh:
-            #     continue
             
             x1, y1, x2, y2 = map(int, xyxy[0].tolist())
             color = compute_color_for_labels(cls_id)
@@ -81,6 +83,8 @@ def main():
             
         
         cv2.imshow('img', img)
+        
+        # If 'Esc' is pressed, then break
         if cv2.waitKey(1) == 27:
             break
 
